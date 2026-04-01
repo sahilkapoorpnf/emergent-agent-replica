@@ -519,16 +519,26 @@
   </div>
 </section>
 
+<script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
 <script>
+$(function() {
   // Mobile menu toggle
-  function toggleMenu() {
-    document.getElementById('mobileMenu').classList.toggle('open');
-  }
+  $('.hamburger').on('click', function() {
+    $('#mobileMenu').toggleClass('open');
+  });
+  $('#mobileMenu a').on('click', function() {
+    $('#mobileMenu').removeClass('open');
+  });
 
   // Carousel
   var currentSlide = 0;
-  var totalSlides = 3;
+  var totalSlides = $('.carousel-slide').length;
   var autoplayTimer;
+
+  function updateCarousel() {
+    $('#carouselTrack').css('transform', 'translateX(-' + (currentSlide * 100) + '%)');
+    $('.carousel-dot').removeClass('active').eq(currentSlide).addClass('active');
+  }
 
   function moveCarousel(dir) {
     currentSlide = (currentSlide + dir + totalSlides) % totalSlides;
@@ -542,35 +552,34 @@
     resetAutoplay();
   }
 
-  function updateCarousel() {
-    var track = document.getElementById('carouselTrack');
-    track.style.transform = 'translateX(-' + (currentSlide * 100) + '%)';
-    var dots = document.querySelectorAll('.carousel-dot');
-    for (var i = 0; i < dots.length; i++) {
-      dots[i].classList.toggle('active', i === currentSlide);
-    }
-  }
-
   function resetAutoplay() {
     clearInterval(autoplayTimer);
     autoplayTimer = setInterval(function() { moveCarousel(1); }, 6000);
   }
+
+  // Carousel controls
+  $('.carousel-btn').eq(0).on('click', function() { moveCarousel(-1); });
+  $('.carousel-btn').eq(1).on('click', function() { moveCarousel(1); });
+  $('.carousel-dot').each(function(i) {
+    $(this).on('click', function() { goToSlide(i); });
+  });
 
   // Start autoplay
   autoplayTimer = setInterval(function() { moveCarousel(1); }, 6000);
 
   // Scroll animations with IntersectionObserver
   var observer = new IntersectionObserver(function(entries) {
-    entries.forEach(function(entry) {
+    $.each(entries, function(_, entry) {
       if (entry.isIntersecting) {
-        entry.target.classList.add('visible');
+        $(entry.target).addClass('visible');
       }
     });
   }, { threshold: 0.1 });
 
-  document.querySelectorAll('.fade-up, .fade-right').forEach(function(el) {
-    observer.observe(el);
+  $('.fade-up, .fade-right').each(function() {
+    observer.observe(this);
   });
+});
 </script>
 
 </body>
